@@ -29,7 +29,10 @@ class Expense {
       title: map['title'],
       amount: map['amount'],
       date: DateTime.parse(map['date']),
-      category: ExpenseCategory.values[map['category']],
+      category: ExpenseCategory.values.firstWhere(
+        (e) => e.name == map['category'],
+        orElse: () => ExpenseCategory.other,
+      ),
     );
   }
 

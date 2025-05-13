@@ -14,7 +14,7 @@ class ExpenseProvider extends ChangeNotifier {
   Map<ExpenseCategory, double> get expensesByCategory => _expensesByCategory;
 
   //Load Expenses
-  Future<void> _loadExpenses() async {
+  Future<void> loadExpenses() async {
     _isLoading = true;
     notifyListeners();
 
@@ -34,22 +34,56 @@ class ExpenseProvider extends ChangeNotifier {
   Future<void> addExpense(Expense expense) async {
     try {
       await DbProvider.instance.insert(expense);
-      await _loadExpenses();
+      await loadExpenses();
     } catch (e) {
       debugPrint("Error adding expense: $e");
     } 
   }
 
-  //Delete Expense 
+  //Delete one Expense 
   Future<void> deleteExpense(int id) async {
     try {
       await DbProvider.instance.delete(id);
-      await _loadExpenses();
+      await loadExpenses();
     } catch (e) {
       debugPrint("Error deleting expense: $e");
     }
   }
   //Update Expense
-  
-  
+  Future<void> updateExpense(Expense expense) async {
+    try {
+      await DbProvider.instance.update(expense);
+      await loadExpenses();
+    } catch (e) {
+      debugPrint("Error updating expense: $e");
+    }
+  }
+
+  Map<DateTime, double> getWeeklyExpenses() {
+    final now = DateTime.now();
+    final Map<DateTime, double> weeklyExpenses = {};
+
+    for (int i = 0; i <= 6; i++) {
+      final date = DateTime(now.year, now.month, now.day - i);
+      weeklyExpenses[date] = 0;
+    }
+
+    for(var expense in _expenses) {
+      final expensesDate = DateTime(expense.date.year, expense.date.month, expense.date.day);
+      if(now.difference(expensesDate).inDays <= 6) {
+        weeklyExpenses.update(expensesDate, (value) => value + expense.amount, ifAbsent: () => expense.amount);
+      }
+    }
+    return weeklyExpenses;
+  }
+
+  // Delete all expenses
+  Future<void> deleteAllExpenses() async {
+    try {
+      await DbProvider.instance.deleteAll();
+      await loadExpenses();
+    } catch (e) {
+      debugPrint("Error deleting all expenses: $e");
+    }
+  }
 }
