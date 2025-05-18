@@ -1,10 +1,13 @@
+import 'package:expense_tracker/models/income.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/expense.dart';
 
 class DbProvider {
   static const _databaseName = "expense_tracker.db";
-  static const _databaseVersion = 1;
+  static const _databaseVersion = 2;
+
+  // Expenses
 
   static const expenseTable = 'expenses';
   static const columnId = 'id';
@@ -12,6 +15,14 @@ class DbProvider {
   static const columnAmount = 'amount';
   static const columnDate = 'date';
   static const columnCategory = 'category';
+
+  // Incomes
+  static const incomeTable = 'incomes';
+  static const incomeColumnId = 'id';
+  static const incomeColumnTitle = 'title';
+  static const incomeColumnAmount = 'amount';
+  static const incomeColumnDate = 'date';
+  static const incomeColumnCategory = 'category';
 
   DbProvider._privateConstructor();
   static final DbProvider instance = DbProvider._privateConstructor();
@@ -34,8 +45,10 @@ class DbProvider {
   }
 
   Future _onCreate(Database db, int version) async {
-    await db.execute('DROP TABLE IF EXISTS $expenseTable');
+    await db.execute('DROP TABLE IF EXISTS $expenseTable'); // İf exists , drop expense table , create new one later
+    await db.execute('DROP TABLE IF EXISTS $incomeTable'); // İf exists , drop income table , create new one later
 
+    // Create Expense Table
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $expenseTable (
         $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,9 +58,21 @@ class DbProvider {
         $columnCategory TEXT NOT NULL
       )
     ''');
+
+    // Create Income Table
+    await db.execute(''' 
+      CREATE TABLE IF NOT EXISTS $incomeTable (
+        $incomeColumnId INTEGER PRIMARY KEY AUTOINCREMENT,
+        $incomeColumnTitle TEXT NOT NULL,
+        $incomeColumnAmount REAL NOT NULL,
+        $incomeColumnDate TEXT NOT NULL,
+        $incomeColumnCategory TEXT NOT NULL
+      )
+    ''');
   }
 
-  Future<int> insert(Expense expense) async {
+  // Expense Operations
+  Future<int> expenseInsert(Expense expense) async {
     Database db = await instance.database;
     return await db.insert(expenseTable, expense.toMap());
   }
@@ -67,7 +92,7 @@ class DbProvider {
     return Expense.fromMap(maps.first);
   }
 
-  Future<int> update(Expense expense) async {
+  Future<int> expenseUpdate(Expense expense) async {
     Database db = await instance.database;
     return await db.update(
       expenseTable,
@@ -77,7 +102,7 @@ class DbProvider {
     );
   }
 
-  Future<int> delete(int id) async {
+  Future<int> expenseDelete(int id) async {
     Database db = await instance.database;
     return await db.delete(
       expenseTable,
@@ -86,19 +111,19 @@ class DbProvider {
     );
   }
 
-  Future<int> deleteAll() async {
+  Future<int> expenseDeleteAll() async {
     Database db = await instance.database;
     return await db.delete(expenseTable);
   }
 
-  Future<double> getTotalExpenses() async {
+  Future<double> expenseGetTotalExpenses() async {
     Database db = await instance.database;
     List<Map<String, dynamic>> result = await db
         .rawQuery('SELECT SUM($columnAmount) as total FROM $expenseTable');
     return result.first['total'] ?? 0.0;
   }
 
-  Future<Map<ExpenseCategory, double>> getExpensesByCategory() async {
+  Future<Map<ExpenseCategory, double>> expenseGetExpensesByCategory() async {
     Database db = await instance.database;
     final List<Map<String, dynamic>> results = await db.rawQuery('''
       SELECT $columnCategory, SUM($columnAmount) as total
@@ -128,4 +153,23 @@ class DbProvider {
     );
     return List.generate(maps.length, (i) => Expense.fromMap(maps[i]));
   }
+
+  // Income Operations
+  Future<int> incomeInsert(Income income) async {
+    Database db = await instance.database;
+    return await db.insert(incomeTable, income.toMap());
+  }
+  Future<List<Income>> queryAllIncomes() async {
+    Database db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.query(incomeTable , orderBy: '$incomeColumnDate DESC');
+    return List.generate(maps.length, (i) => Income.fromMap(maps[i]));
+  }
+
+  Future<Income?> queryIncomeRow(int id) async {
+    Database db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.query(incomeTable, where: '$incomeColumnId = ?', whereArgs: [id]);
+    if (maps.isEmpty) return null;
+    return Income.fromMap(maps.first);
+  }
+  
 }

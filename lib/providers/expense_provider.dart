@@ -20,8 +20,8 @@ class ExpenseProvider extends ChangeNotifier {
 
     try {
       _expenses = await DbProvider.instance.queryAllRows();
-      _totalExpenses = await DbProvider.instance.getTotalExpenses();
-      _expensesByCategory = await DbProvider.instance.getExpensesByCategory();
+      _totalExpenses = await DbProvider.instance.expenseGetTotalExpenses();
+      _expensesByCategory = await DbProvider.instance.expenseGetExpensesByCategory();
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -33,7 +33,7 @@ class ExpenseProvider extends ChangeNotifier {
   //Add Expense
   Future<void> addExpense(Expense expense) async {
     try {
-      await DbProvider.instance.insert(expense);
+      await DbProvider.instance.expenseInsert(expense);
       await loadExpenses();
     } catch (e) {
       debugPrint("Error adding expense: $e");
@@ -43,7 +43,7 @@ class ExpenseProvider extends ChangeNotifier {
   //Delete one Expense 
   Future<void> deleteExpense(int id) async {
     try {
-      await DbProvider.instance.delete(id);
+      await DbProvider.instance.expenseDelete(id);
       await loadExpenses();
     } catch (e) {
       debugPrint("Error deleting expense: $e");
@@ -52,7 +52,7 @@ class ExpenseProvider extends ChangeNotifier {
   //Update Expense
   Future<void> updateExpense(Expense expense) async {
     try {
-      await DbProvider.instance.update(expense);
+      await DbProvider.instance.expenseUpdate(expense);
       await loadExpenses();
     } catch (e) {
       debugPrint("Error updating expense: $e");
@@ -80,7 +80,7 @@ class ExpenseProvider extends ChangeNotifier {
   // Delete all expenses
   Future<void> deleteAllExpenses() async {
     try {
-      await DbProvider.instance.deleteAll();
+      await DbProvider.instance.expenseDeleteAll();
       await loadExpenses();
     } catch (e) {
       debugPrint("Error deleting all expenses: $e");
