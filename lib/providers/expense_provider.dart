@@ -17,7 +17,7 @@ class ExpenseProvider extends ChangeNotifier {
   Future<void> loadExpenses() async {
     _isLoading = true;
     notifyListeners();
-
+    
     try {
       _expenses = await DbProvider.instance.queryAllRows();
       _totalExpenses = await DbProvider.instance.expenseGetTotalExpenses();

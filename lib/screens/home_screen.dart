@@ -1,4 +1,4 @@
-import 'package:expense_tracker/widgets/category_chart.dart';
+import 'package:expense_tracker/widgets/expense_category_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -143,7 +143,7 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           SizedBox(
                             height: 200,
-                            child: CategoryPieChart(
+                            child: ExpenseCategoryPieChart(
                               expensesByCategory: expenseProvider.expensesByCategory,
                               totalExpenses: expenseProvider.totalExpenses,
                             ),

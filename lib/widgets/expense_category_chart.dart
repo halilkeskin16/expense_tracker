@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/expense.dart';
 
-class CategoryPieChart extends StatelessWidget {
+class ExpenseCategoryPieChart extends StatelessWidget {
   final Map<ExpenseCategory, double> expensesByCategory;
   final double totalExpenses;
 
-  const CategoryPieChart({
+  const ExpenseCategoryPieChart({
     super.key,
     required this.expensesByCategory,
     required this.totalExpenses,
