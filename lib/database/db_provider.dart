@@ -77,7 +77,7 @@ class DbProvider {
     return await db.insert(expenseTable, expense.toMap());
   }
 
-  Future<List<Expense>> queryAllRows() async {
+  Future<List<Expense>> queryAlExpensesRows() async {
     Database db = await instance.database;
     final List<Map<String, dynamic>> maps =
         await db.query(expenseTable, orderBy: '$columnDate DESC');
@@ -119,7 +119,7 @@ class DbProvider {
   Future<double> expenseGetTotalExpenses() async {
     Database db = await instance.database;
     List<Map<String, dynamic>> result = await db
-        .rawQuery('SELECT SUM($columnAmount) as total FROM $expenseTable');
+        .rawQuery('SLEECT SUM($columnAmount) as total FROM $expenseTable');
     return result.first['total'] ?? 0.0;
   }
 
@@ -172,4 +172,41 @@ class DbProvider {
     return Income.fromMap(maps.first);
   }
   
+  Future<int> incomeUpdate(Income income) async {
+    Database db = await instance.database;
+    return await db.update(incomeTable, income.toMap(), where: '$incomeColumnId = ?', whereArgs: [income.id]);
+  }
+
+  Future<int> incomeDelete(int id) async {
+    Database db = await instance.database;
+    return await db.delete(incomeTable, where: '$incomeColumnId = ?', whereArgs: [id]);
+  }
+
+  Future<int> incomeDeleteAll() async {
+    Database db = await instance.database;
+    return await db.delete(incomeTable);
+  }
+
+  Future<double> incomeGetTotalIncomes() async {
+    Database db = await instance.database;
+    List<Map<String, dynamic>> result = await db.rawQuery('SELECT SUM($incomeColumnAmount) as total FROM $incomeTable');
+    return result.first['total'] ?? 0.0;
+  }
+
+  Future<Map<IncomeCategory, double>> incomeGetIncomesByCategory() async {
+    Database db = await instance.database;
+    final List<Map<String, dynamic>> results = await db.rawQuery('''
+      SELECT $incomeColumnCategory, SUM($incomeColumnAmount) as total
+      FROM $incomeTable
+      GROUP BY $incomeColumnCategory
+    ''');
+    
+    return Map.fromEntries(
+      results.map((row) => MapEntry(
+            IncomeCategory.values
+                .firstWhere((e) => e.name == row[incomeColumnCategory]),
+            (row['total'] as num).toDouble(),
+          )),
+    );
+  } 
 }

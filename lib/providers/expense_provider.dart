@@ -19,7 +19,7 @@ class ExpenseProvider extends ChangeNotifier {
     notifyListeners();
     
     try {
-      _expenses = await DbProvider.instance.queryAllRows();
+      _expenses = await DbProvider.instance.queryAlExpensesRows();
       _totalExpenses = await DbProvider.instance.expenseGetTotalExpenses();
       _expensesByCategory = await DbProvider.instance.expenseGetExpensesByCategory();
     } catch (e) {

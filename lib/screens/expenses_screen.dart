@@ -15,10 +15,8 @@ class ExpensesScreen extends StatelessWidget {
         if (expenseProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-
         final expenses = expenseProvider.expenses;
         final currencyFormat = NumberFormat.currency(symbol: '₺');
-
         if (expenses.isEmpty) {
           return Center(
             child: Column(
